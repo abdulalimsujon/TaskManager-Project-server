@@ -9,6 +9,10 @@ exports.createTask=(req,res)=>{
         const email = req.headers['email']
 
         const {title,description,status} = req.body;
+ 
+        // console.log(title)
+        // console.log(description)
+        // console.log(status)
         if (!title) {
             return res.json({ error: 'title is required' })
         }
@@ -47,7 +51,7 @@ exports.createTask=(req,res)=>{
 exports.deleteTask =(req,res)=>{
     const id = req.params.id;
 
-    console.log(id)
+    // console.log(id)
 
     Task.remove({_id:id},(error,data)=>{
         if(error){
@@ -83,9 +87,9 @@ exports.updateTask =(req,res)=>{
 exports.updateTaskStatus =(req,res)=>{
 
     const id = req.params.id;
-    console.log(id)
+    // console.log(id)
     const status = req.params.status;
-    console.log(status)
+    // console.log(status)
 
     Task.findOneAndUpdate({_id:id},
         {
@@ -106,12 +110,13 @@ exports.updateTaskStatus =(req,res)=>{
 exports.groupByStatus=(req,res)=>{
 
     const status = req.params.status;
-    const email = req.headers['email'];
+   
+      console.log(status)
 
     Task.aggregate([{
-        $match:{status:status,email:email}},
+        $match:{status:status}},
         {$project:{
-            _id:1,title:1,status:1,discription:1,
+            _id:1,title:1,status:1,description:1,
             createDate:{
                 $dateToString:{
                     date:"$createDate",
