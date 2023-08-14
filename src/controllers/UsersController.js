@@ -136,20 +136,17 @@ exports.login=async(req,res)=>{
 
 exports.profileUpdate=(req,res)=>{
 
-    // const email = req.headers.email;
     const email = req.headers['email']
 
     let reqBody= req.body;
 
-    console.log("frsgjfds////>.>",reqBody)
-
-
     User.updateOne({email:email},reqBody,(error,data)=>{
 
-        if(error){
+        if(data?.error){
             res.status(400).json({status:'fail',data:error})
             return false;
         }else{
+            
             res.status(200).json({status:'success',data:data})
             return true
         }
@@ -167,7 +164,7 @@ exports.ProfileDetails=(req,res)=>{
 
     User.aggregate([
         {$match:{email}},
-        {$project:{_id:1,email:1,firstName:1,lastName:1,mobile:1}}
+        {$project:{_id:1,email:1,firstName:1,lastName:1,mobile:1,photo:1}}
     ],(error,data)=>{
     
         if(error){

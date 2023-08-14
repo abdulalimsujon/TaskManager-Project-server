@@ -16,7 +16,8 @@ router.post('/profileUpdate',AuthVerifyMiddleware,profileUpdate)
 router.get('/profileDetail',AuthVerifyMiddleware,ProfileDetails)
 
 
-//----------------->Task----------------------->                                                                                         
+//----------------->Task----------------------->   
+                                                                                      
 router.post('/createTask',createTask)
 router.get("/deleteTask/:id",AuthVerifyMiddleware,deleteTask);
 router.get("/updateTask/:id",AuthVerifyMiddleware,updateTask);

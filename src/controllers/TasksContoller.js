@@ -10,9 +10,6 @@ exports.createTask=(req,res)=>{
 
         const {title,description,status} = req.body;
  
-        // console.log(title)
-        // console.log(description)
-        // console.log(status)
         if (!title) {
             return res.json({ error: 'title is required' })
         }
