@@ -237,14 +237,11 @@ exports.RecoverVerifyOtp=async(req,res)=>{
 
         const OTPcount = await otpModel.aggregate([{$match:{email:email,otp:otp,status:status}},{$count:"total"}])
 
-        console.log(OTPcount)
-
         if(OTPcount.length>0){
-
             const otpUpdate = await otpModel.updateOne({email:email,otp:otp,status:status},{status:updateStatus})
               
 
-            res.status(200).json({status:"success",data:"Otp updated"})
+            res.status(200).json({status:"success",data:otpUpdate})
 
         }else{
             res.status(400).json({status:"fail",data:"invalid OTP found"})
@@ -259,4 +256,43 @@ exports.RecoverVerifyOtp=async(req,res)=>{
 
 }
 
+
+//------------------------------>Recover Reset password------------------>
+
+
+exports.RecoverResetPass = async(req,res)=>{
+   
+      const email = req.body.email;
+      const otp = req.body.otp;
+      const password = req.body.password;
+
+    let updateStatus = 1;
+
+    try{
+
+        const OTPcount = await otpModel.aggregate([{$match:{email:email,otp:otp,status:updateStatus}},{$count:"total"}])
+         
+
+        if(OTPcount.length>0){
+
+
+            const hash = await hashPassword(password)
+
+            const result = await User.updateOne({email:email},{email:email,password:hash,otp:otp})
+              
+
+            res.status(200).json({status:"success",data:"password changed"})
+
+        }else{
+            res.status(200).json({status:"fail",data:"invalid account"})
+        }
+
+    }catch(error){
+
+        res.status(400).json({status:"fail",data:"internal error"})
+
+    }
+
+
+}
 
