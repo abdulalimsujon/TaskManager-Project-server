@@ -1,6 +1,8 @@
 const { hashPassword, comparePassword } = require('../helper/auth');
 const User = require("../models/UsersModel")
-const jwt = require('jsonwebtoken')
+const otpModel = require("../models/OTPmodel")
+const jwt = require('jsonwebtoken');
+const sendEmailUtility = require('../utility/SendEmailUtility');
 
 //registration
 
@@ -92,6 +94,8 @@ exports.login=async(req,res)=>{
       // 3. check if email is taken
       const existUser = await User.findOne({ email: email })
 
+      console.log(existUser)
+
 
     
         
@@ -167,12 +171,10 @@ exports.ProfileDetails=(req,res)=>{
         {$project:{_id:1,email:1,firstName:1,lastName:1,mobile:1,photo:1}}
     ],(error,data)=>{
     
-        if(error){
+        if(data?.error){
             res.status(400).json({status:"fail",data:error})
         }else{
-
-            
-         
+        
             res.status(200).json({status:"success",data:data})
         }
 
@@ -180,6 +182,81 @@ exports.ProfileDetails=(req,res)=>{
 }
 
 
+
+///------------------------->Recover verify Email----------------->
+
+
+exports.RecoverVerifyEmail = async(req,res)=>{
+
+    const email = req.params.email;
+
+    let OTPCode = Math.floor(1000+Math.random()*900000)
+
+    try{
+
+
+        let UserCount =  await User.aggregate([{$match:{email:email}},{$count:"total"}])
+
+        if(UserCount.length>0){
+
+            // otp Insert to the Otp model
+
+            let CreateOtp = await otpModel.create({email:email,otp:OTPCode})
+
+            //email send
+
+            let SendEmail = await sendEmailUtility(email,"your pin code is"+OTPCode,"task manager pin verification")
+
+            res.status(200).json({status:"success",data:SendEmail})
+
+        }else{
+            res.status(400).json({status:"fail",data:"No user found"})
+        } 
+
+
+    }catch(error){
+
+        res.json(400).json("something went wrong")
+
+    }
+
+
+}
   
+
+///.........................>recover verity OTP..............---------->
+
+exports.RecoverVerifyOtp=async(req,res)=>{
+
+    let email = req.params.email;
+    let otp = req.params.otp;
+    let status = 0;
+    let updateStatus = 1;
+
+    try{
+
+        const OTPcount = await otpModel.aggregate([{$match:{email:email,otp:otp,status:status}},{$count:"total"}])
+
+        console.log(OTPcount)
+
+        if(OTPcount.length>0){
+
+            const otpUpdate = await otpModel.updateOne({email:email,otp:otp,status:status},{status:updateStatus})
+              
+
+            res.status(200).json({status:"success",data:"Otp updated"})
+
+        }else{
+            res.status(400).json({status:"fail",data:"invalid OTP found"})
+        }
+
+    }catch(error){
+
+        res.status(400).json({status:"fail",data:"internal error"})
+
+    }
+
+
+}
 
 
